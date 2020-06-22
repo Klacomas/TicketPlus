@@ -1,0 +1,266 @@
+package Main;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Scanner;
+
+import modelo.Entrada;
+import modelo.EntradaVip;
+import modelo.Evento;
+import modelo.Vendedor;
+
+public class MainClass {
+
+	public static void main(String[] args) {
+		
+		Scanner sc = new Scanner(System.in);
+		boolean salir = false;
+		String opcion = "salir";
+		while(!opcion.equals("9")) {
+		
+			System.out.println("1--Crear evento\n");
+			System.out.println("2--Vender entrada\n");
+			System.out.println("3--Ingresar a evento\n");
+			System.out.println("4--Cambio de estado\n");
+			System.out.println("5--Entradas vendidas por vendedor\n"); //listo
+			System.out.println("9--salir");
+			
+			opcion = sc.nextLine();
+		
+			if(opcion.equals("1")) {
+				System.out.printf("Crear evento seleccionado\n");
+				crearEvento();
+			}
+			else if(opcion.equals("2")) {
+				System.out.printf("Vender entrada seleccionado\n");
+				venderEntrada();
+			}
+			else if(opcion.equals("3")) {
+				System.out.printf("Ingreso a evento\n");
+				ingresoDeEvento();
+			}
+			else if(opcion.equals("4")) {
+				System.out.printf("Cambio de estado seleccionado\n"); 
+				cambioDeEstado();
+			}
+			else if(opcion.equals("5")) {
+				System.out.printf("Entradas vendidas por vendedor\n");
+				entradasVendidas();
+			}
+			else if(opcion.equals("9")) {
+				System.out.printf("Salir\n");
+			}
+			else  {
+				System.out.printf("numero no ingresado correctamente\n");
+			}
+
+		}
+	}
+	
+
+	private static void entradasVendidas() {
+		
+		int vendidasENormales = 0;
+		int vendidasEVip = 0;
+		String nombreDelVendedor = null;
+		
+		//este metodo es para calcular la cantidad de entradas vendidas por el vendedor
+		System.out.println("---Calculo entrada vendida por vendedor---");
+		System.out.println("Ingrese rut del vendedor");
+		Scanner sc = new Scanner (System.in); //se declara una variable sc de tipo scanner y se instancia con la clase scanner
+		String rutVendedor ;        // se declara la variable rutvendedor del tipo string
+		rutVendedor = sc.nextLine(); //se asigna el valor ingresado por teclado a la variable rutvendedor
+		
+		ArrayList<Vendedor>lstVendedores = new ArrayList<Vendedor>();
+		lstVendedores = obtenerListaVendedores();
+
+		for (Vendedor vendedortmp :lstVendedores) {
+						
+			if (rutVendedor.equals(vendedortmp.getRut())) {
+				 vendidasENormales = vendedortmp.getVendidasENormales();
+				
+				 vendidasEVip = vendedortmp.getVendidasEVip();
+				
+				 nombreDelVendedor = vendedortmp.getNombre(); //se crea la variable nombre del vendedor y se muestra
+				
+				
+				break;
+			}
+			
+		}
+		System.out.println("las entradas vendidas por el vendedor :" + nombreDelVendedor  + " son : " +
+		vendidasENormales + " entradas normmales y "+ vendidasEVip + " entradas vip" );
+		
+	}
+
+	private static ArrayList<Vendedor> obtenerListaVendedores() {
+		SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+		
+		ArrayList<Vendedor> listaVendedores = new ArrayList <Vendedor> ();
+		
+		Vendedor vendedor = null ;
+		
+		
+		 try {
+//				public Vendedor(String rut, String nombre, int vendidasENormales, int vendidasEVip) {
+		 vendedor = new Vendedor("19" , "luis"  , 20 , 30);//instanciar objeto del tipo vendedor 
+		 listaVendedores.add (vendedor);
+		 vendedor = new Vendedor("20" , "juan" ,  21 , 32);//instanciar objeto del tipo vendedor 
+		 listaVendedores.add (vendedor);
+		 vendedor = new Vendedor("21" , "pepe" ,  21 , 32);//instanciar objeto del tipo vendedor 
+		 listaVendedores.add (vendedor);
+	
+		}	catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return listaVendedores;
+	}
+	
+
+	private static void cambioDeEstado() {
+		//cambiar estado del evento si esta abierto o cerrado
+	}
+
+	private static void ingresoDeEvento() {
+		//valida el ingresadas al evento/usos de entradas
+	}
+
+
+	private static void venderEntrada() {
+		Scanner sc = new Scanner (System.in);
+		boolean esVip=false;
+
+		//		Solicita datos de entrada
+		System.out.println("---Venta de entradas---");
+		System.out.println("Ingrese nombre evento:");
+		String nombreEvento= sc.nextLine();
+		System.out.println("Ingrese rut cliente:");
+		String rutCliente= sc.nextLine();
+		System.out.println("Ingrese rut vendedor:");
+		String rutVendedor=sc.nextLine();
+		System.out.println("Ingrese tipo entrada:");
+		System.out.println("1.- Entrada Vip");
+		System.out.println("2.- Entrada Normal");
+		int tipoEntrada=sc.nextInt();
+		if(tipoEntrada==1) {
+			esVip=true;
+		}
+		
+		//valida estado evento
+		if(validaVendedor(rutVendedor)) {
+			ArrayList<Evento> lstEvento = obtenerListaEvento();
+			for(Evento evento:lstEvento) {
+				if(evento.getNombreEvento().equals(nombreEvento)) {
+					ArrayList<EntradaVip> lstEntradas = evento.getListEntrada();
+					for(EntradaVip entrada:lstEntradas) {
+						if(!entrada.isEsVendida()) {
+							entrada.setNroCliente(rutCliente);
+							entrada.setNroVendedor(rutVendedor);
+							entrada.setEsVendida(true);
+							evento.setNroVendidas(evento.getNroVendidas()+1);
+							entrada.setEsVip(esVip);
+							System.out.println("Entrada vendida " + entrada.getNroAsiento());
+							actualizaVendidas(rutVendedor, esVip);
+							break;
+						}
+					}
+				}
+				
+			}
+		}else {
+			System.out.println("Vendedor no existe");
+		}
+	}
+
+	private static boolean validaVendedor(String rutVendedor) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	private static void actualizaVendidas(String rutVendedor, boolean esVip) {
+		// TODO Auto-generated method stub
+		ArrayList<Vendedor> lstVendedores= obtenerListaVendedores();
+		boolean existeVendedor=false;
+		for(Vendedor vendedor:lstVendedores) {
+			if(vendedor.getRut().equals(rutVendedor)) {
+				if(esVip) {
+					vendedor.setVendidasEVip(vendedor.getVendidasEVip()+1);
+				}else {
+					vendedor.setVendidasENormales(vendedor.getVendidasENormales()+1);
+				}
+				existeVendedor=true;
+				System.out.println("Se actualizan las entradas del vendedor " + vendedor.getNombre());
+				break;
+			}
+		}
+		if(!existeVendedor) {
+			System.out.println("Vendedor no encontrado");
+		}
+	}
+
+
+	private static ArrayList<Evento> obtenerListaEvento() {
+		
+		ArrayList<EntradaVip> lstEntrada = crearListaEntradas(15,1200);
+		ArrayList<Evento> lstEvento=new ArrayList<Evento>();
+		Evento evento = new Evento("Lollapaloza", 18, 15,lstEntrada,false,0,0);
+		lstEvento.add(evento);
+		lstEntrada = crearListaEntradas(20,1500);
+		evento=new Evento("Festigame",20,20,lstEntrada, false,0,0);
+		lstEvento.add(evento);
+
+		return lstEvento;
+	}
+
+
+	private static void crearEvento() {
+		//crear evento
+		
+		String nombreDelEvento  ;    //declaracion de variable de tipo string nombre del evento
+		int edadMinima  ;      //declarando variable de tipo int edad minima
+		int canTicket ; //variable de tipo int cantidad de ticket
+		int  precioTicket;  //variable tipo int precio de ticket
+		
+		
+		System.out.println("---Crear evento---"); //pedir al usuario los datos del evento
+		System.out.println("Nombre del evento");
+		
+		Scanner sc = new Scanner (System.in);
+		nombreDelEvento = sc.nextLine();
+		
+		System.out.println("Edad");
+		
+		edadMinima = sc.nextInt();
+		
+		System.out.println("Ingresar cantidad de ticket");
+		canTicket = sc.nextInt ();
+		
+		
+		System.out.println("precio del ticket");
+		 precioTicket = sc.nextInt ();
+		 
+		 ArrayList<EntradaVip> lstEntradas = crearListaEntradas(canTicket,precioTicket);
+		 
+		 		 
+//		    public Evento(String nombreEvento, int edadMinima, int cantTicket, ArrayList<EntradaVip> listEntrada,
+//		            Boolean enCurso, int nroUsadas, int nroVendidas)
+		 Evento evento =  new Evento(nombreDelEvento,edadMinima,canTicket, lstEntradas,false,0,0);
+		 System.out.println();
+		 
+	}
+
+	
+   public static ArrayList<EntradaVip> crearListaEntradas (int cantTicket, int precio) {//retorna cantTicket, precio, devuelve el aarray
+        
+        ArrayList<EntradaVip> entradasEvento = new ArrayList<EntradaVip>();
+        int i;
+        for(i=0;i<cantTicket;i++) {
+        	EntradaVip entrada = new EntradaVip(i+1,precio,"","",false,false,false); 
+            entradasEvento.add(entrada);
+        }
+        return entradasEvento;
+    }
+}
